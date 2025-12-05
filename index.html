@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Account Deletion — Bhikadiya Community App</title>
+  <style>
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,'Noto Sans',sans-serif;margin:0;background:#f7fafc;color:#0f172a}
+    .container{max-width:900px;margin:40px auto;padding:24px;background:#fff;border-radius:10px;box-shadow:0 6px 24px rgba(2,6,23,0.08)}
+    h1{font-size:22px;margin:0 0 8px}
+    p.lead{margin:0 0 16px;color:#334155}
+    form{display:grid;gap:12px}
+    label{font-weight:600;font-size:14px}
+    input,select,textarea{padding:10px;border:1px solid #e6eef5;border-radius:8px;font-size:14px;width:100%;}
+    button{background:#ef4444;color:#fff;padding:10px 14px;border-radius:8px;border:0;cursor:pointer}
+    .muted{color:#667085;font-size:13px}
+    .note{background:#f1f5f9;padding:12px;border-radius:8px}
+    ul{margin:6px 0 0 18px}
+    pre{background:#0f172a;color:#fff;padding:10px;border-radius:6px;overflow:auto}
+    .important{background:#fee2e2;padding:12px;border-radius:8px;color:#b91c1c}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Immediate & Complete Account Deletion</h1>
+    <p class="lead">This page allows users to request permanent deletion of their account and all associated personal data. The deletion is executed <strong>immediately and permanently</strong> when the request is confirmed.</p>
+
+    <div class="important">
+      <strong>Important:</strong> Once deletion completes, <u>all personal data is permanently removed</u> and cannot be recovered.</div>
+
+    <h3>How deletion works</h3>
+    <div class="note">
+      <ul>
+        <li>When you confirm deletion, the system will <strong>immediately and permanently remove</strong> the following data:</li>
+        <ul>
+          <li>Personal identifiers: full name, display name, email, mobile prefix & number, profile photo</li>
+          <li>Authentication data: password hash, OTPs, reset tokens</li>
+          <li>Profile fields: village, city, state, country, occupation, blood group, gender, DOB, age</li>
+          <li>Family relations: familyHeadId, parentId — links will be removed; family members remain but references cleared</li>
+          <li>Device & session data: device tokens, active sessions, push tokens</li>
+          <li>Sensitive records: payment identifiers, saved card/token references (transaction history summaries may be kept anonymized)</li>
+        </ul>
+        <li>After deletion, the user record will not remain searchable or usable for login.</li>
+      </ul>
+    </div>
+
+    <h3>Request deletion</h3>
+    <form id="deleteForm">
+      <div>
+        <label>Mobile prefix (e.g. +91)</label>
+        <input name="mobilePrefix" id="mobilePrefix" placeholder="Country code used at registration" />
+      </div>
+
+      <div>
+        <label>Mobile number (10 digits)</label>
+        <input name="mobileNumber" id="mobileNumber" placeholder="9099xxxxxx" required />
+      </div>
+
+      <div>
+        <label>Email (if registered)</label>
+        <input name="email" id="email" placeholder="you@example.com" />
+      </div>
+
+      <div>
+        <label>Reason (optional)</label>
+        <textarea id="reason" rows="3" placeholder="Optional: why you want to delete your account"></textarea>
+      </div>
+
+      <div>
+        <label><input type="checkbox" id="confirm" /> I confirm I want my account and all personal data to be permanently deleted immediately.</label>
+      </div>
+
+      <div style="display:flex;gap:8px;align-items:center">
+        <button type="submit">Delete my account permanently</button>
+        <div class="muted">You will be logged out and cannot recover this account after deletion.</div>
+      </div>
+    </form>
+
+    <h3>Retention & backups</h3>
+    <p class="muted">We will delete your data from the production database immediately. Operational backups will be securely purged at the next backup cycle. Anonymized audit logs may be retained for legal reasons for no longer than <strong>1 year</strong>.</p>
+
+    <script>
+      document.getElementById('deleteForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const mobilePrefix = document.getElementById('mobilePrefix').value.trim();
+        const mobileNumber = document.getElementById('mobileNumber').value.trim();
+        const email = document.getElementById('email').value.trim();
+        const reason = document.getElementById('reason').value.trim();
+        const confirm = document.getElementById('confirm').checked;
+
+        if (!mobileNumber) return alert('Please enter your mobile number');
+        if (!confirm) return alert('Please confirm permanent deletion');
+
+        try {
+          const res = await fetch('https://account-deletion-req.vercel.app/api/v1/user/delete-account-request', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ mobilePrefix, mobileNumber, email, reason, confirm })
+          });
+
+          const data = await res.json();
+
+          if (data.success) {
+            alert(data.msg || 'Account permanently deleted');
+            window.location.href = '/'; 
+          } else {
+            alert(data.msg || 'Server response: ' + JSON.stringify(data));
+          }
+        } catch (err) {
+          console.error(err);
+          alert('Network error, please try again later');
+        }
+      });
+    </script>
+
+    <h3>Contact</h3>
+    <p class="muted">For questions about deletion, contact: <strong>bhikadiyaparivar.org@gmail.com</strong></p>
+
+  </div>
+</body>
+</html>
