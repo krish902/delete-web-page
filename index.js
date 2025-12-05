@@ -3,22 +3,17 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 
-// Load environment variables
 require('dotenv').config();
 
 const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
-// ----------------- Connect to MongoDB -----------------
-mongoose.connect(process.env.MONGO_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
-.then(() => console.log('✅ MongoDB connected'))
-.catch(err => console.error('❌ MongoDB connection error:', err));
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log('✅ MongoDB connected'))
+  .catch(err => console.error('❌ MongoDB connection error:', err));
 
-// ----------------- User Model -----------------
+
 const userSchema = new mongoose.Schema({
   firstName: String,
   middleName: String,
@@ -61,3 +56,5 @@ app.post('/api/v1/user/delete-account-request', async (req, res) => {
     return res.status(500).json({ success: false, msg: 'Server error', error: err.message });
   }
 });
+
+module.exports = app;
