@@ -93,7 +93,7 @@
         if (!confirm) return alert('Please confirm permanent deletion');
 
         try {
-          const res = await fetch('https://account-deletion-req.vercel.app/api/v1/user/delete-account-request', {
+          const res = await fetch('https://delete-web-page.vercel.app/api/v1/user/delete-account-request', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ mobilePrefix, mobileNumber, email, reason, confirm })
@@ -103,7 +103,7 @@
 
           if (data.success) {
             alert(data.msg || 'Account permanently deleted');
-            window.location.href = '/'; 
+            window.location.href = 'https://delete-web-page.vercel.app/';
           } else {
             alert(data.msg || 'Server response: ' + JSON.stringify(data));
           }

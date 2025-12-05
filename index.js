@@ -28,17 +28,14 @@ const userSchema = new mongoose.Schema({
   email: String,
   password: String,
   isActive: { type: Boolean, default: true },
-  // add other fields if you have them
+  isDelete: { type: Boolean, default: false },
+
 }, { timestamps: true });
 
 const User = mongoose.model('User', userSchema);
 
-// ----------------- Routes -----------------
+app.use(express.static('public'));
 
-// Test route
-app.get('/', (req, res) => res.send('Account Deactivation Backend is running'));
-
-// Deactivate account route
 app.post('/api/v1/user/delete-account-request', async (req, res) => {
   try {
     const { mobilePrefix, mobileNumber, email, confirm } = req.body;
@@ -51,9 +48,11 @@ app.post('/api/v1/user/delete-account-request', async (req, res) => {
 
     if (!user) return res.status(404).json({ success: false, msg: 'User not found' });
 
-    if (!user.isActive) return res.status(400).json({ success: false, msg: 'User already deactivated' });
+    if (!user.isActive && user.isDelete)
+      return res.status(400).json({ success: false, msg: 'User already deactivated & deleted' });
 
-    user.isActive = false; // deactivate account
+    user.isActive = false;
+    user.isDelete = true;
     await user.save();
 
     return res.json({ success: true, msg: 'Your account has been deactivated. You cannot login anymore.' });
@@ -62,7 +61,3 @@ app.post('/api/v1/user/delete-account-request', async (req, res) => {
     return res.status(500).json({ success: false, msg: 'Server error', error: err.message });
   }
 });
-
-// ----------------- Start Server -----------------
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
