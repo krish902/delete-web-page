@@ -33,13 +33,13 @@ app.use(express.static('public'));
 
 app.post('/api/v1/user/delete-account-request', async (req, res) => {
   try {
-    const { mobilePrefix, mobileNumber, email, confirm } = req.body;
+    const { mobileNumber, email, confirm } = req.body;
 
     if (!mobileNumber) return res.status(400).json({ success: false, msg: 'Mobile number is required' });
+    if (!email) return res.status(400).json({ success: false, msg: 'Email is required' });
     if (!confirm) return res.status(400).json({ success: false, msg: 'You must confirm deactivation' });
 
-    const fullMobile = mobilePrefix ? `${mobilePrefix}${mobileNumber}` : mobileNumber;
-    const user = await User.findOne({ mobileNumber: fullMobile });
+    const user = await User.findOne({ mobileNumber });
 
     if (!user) return res.status(404).json({ success: false, msg: 'User not found' });
 
